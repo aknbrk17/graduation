@@ -9,15 +9,20 @@ import RightSidebar from "@/components/RightSidebar";
 import { useEffect, useRef, useState } from "react";
 import { handleCanvasMouseDown, handleCanvaseMouseMove, handleCanvasMouseUp, handleResize, initializeFabric, renderCanvas, handleCanvasObjectModified } from "@/lib/canvas";
 import { ActiveElement } from "@/types/type";
-import { useMutation, useStorage } from "@/liveblocks.config";
+import { useMutation, useRedo, useStorage, useUndo } from "@/liveblocks.config";
+import { defaultNavElement } from "@/constants";
+import { handleDelete, handleKeyDown } from "@/lib/key-events";
 
 export default function Page() {
+
+  const undo = useUndo();
+  const redo = useRedo();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<fabric.Canvas | null>(null);
   const isDrawing = useRef(false);
   const shapeRef = useRef<fabric.Object | null>(null);
-  const selectedShapeRef = useRef<string | null>('rectangle');
+  const selectedShapeRef = useRef<string | null>(null);
   const activeObjectRef = useRef<string | null>(null);
 
   const canvasObjects = useStorage((root) => root.canvasObjects);
@@ -42,8 +47,46 @@ object) => {
     icon: ''
   });
 
+
+  const deleteAllShapes = useMutation(({storage}) => {
+    const canvasObjects = storage.get('canvasObjects')
+
+    if(!canvasObjects || canvasObjects.size === 0)
+      return true;
+    
+    for (const [key, value] of canvasObjects.entries()){
+      canvasObjects.delete(key)
+    }
+
+    return canvasObjects.size === 0;
+  }, []);
+
+
+  const deleteShapeFromStorage = useMutation(({
+    storage }, objectId) => {
+      const canvasObjects = storage.get('canvasObjects');
+
+      canvasObjects.delete(objectId);
+    }, [])
+
   const handleActiveElement = (elem: ActiveElement) => {
     setActiveElement(elem);
+
+    switch(elem?.value){
+      case 'reset':
+        deleteAllShapes();
+        fabricRef.current?.clear();
+        setActiveElement(defaultNavElement)
+        break;
+      
+      case 'delete':
+        handleDelete(fabricRef.current as any, deleteShapeFromStorage)
+        setActiveElement(defaultNavElement)
+        break;
+
+      default:
+        break;
+    }
 
     selectedShapeRef.current = elem?.value as string;
   }
@@ -51,7 +94,7 @@ object) => {
   useEffect(() => {
     const canvas = initializeFabric({ canvasRef, fabricRef })
 
-    canvas.on("mouse:down", (options) => {
+    canvas.on("mouse:down", (options: any) => {
       handleCanvasMouseDown({
         options,
         canvas,
@@ -61,7 +104,7 @@ object) => {
       })
     })
 
-    canvas.on("mouse:move", (options) => {
+    canvas.on("mouse:move", (options: any) => {
       handleCanvaseMouseMove({
         options,
         canvas,
@@ -72,7 +115,7 @@ object) => {
       })
     })
 
-    canvas.on("mouse:up", (options) => {
+    canvas.on("mouse:up", () => {
       handleCanvasMouseUp({
         canvas,
         isDrawing,
@@ -84,7 +127,7 @@ object) => {
       })
     })
 
-    canvas.on("object:modified", (options) => {
+    canvas.on("object:modified", (options: any) => {
       handleCanvasObjectModified({
         options,
         syncShapeInStorage
@@ -94,6 +137,21 @@ object) => {
     window.addEventListener("resize", () => {
       handleResize( {fabricRef} )
     })
+
+    window.addEventListener("keydown", (e: any) => {
+      handleKeyDown({
+        e,
+        canvas: fabricRef.current,
+        undo,
+        redo,
+        syncShapeInStorage,
+        deleteShapeFromStorage
+      })
+    })
+
+    return () => {
+      canvas.dispose();
+    }
   }, [])
 
   useEffect(() => {
@@ -111,8 +169,8 @@ object) => {
         handleActiveElement={handleActiveElement}
       />
       <section className="flex h-full flex-row">
-        <LeftSidebar/>
-        <Live />
+        <LeftSidebar allShapes={Array.from(canvasObjects)}/>
+        <Live canvasRef={canvasRef}/>
         <RightSidebar/>
       </section>
     </main>
