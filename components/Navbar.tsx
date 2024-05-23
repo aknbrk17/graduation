@@ -8,13 +8,17 @@ import { ActiveElement, NavbarProps } from "@/types/type";
 
 import { Button } from "./ui/button";
 import ShapesMenu from "./ShapesMenu";
-import ActiveUsers from "./users/ActiveUsers";
 import { NewThread } from "./comments/NewThread";
+import Login from "./Login";
+
+
 
 const Navbar = ({ activeElement, imageInputRef, handleImageUpload, handleActiveElement }: NavbarProps) => {
   const isActive = (value: string | Array<ActiveElement>) =>
     (activeElement && activeElement.value === value) ||
     (Array.isArray(value) && value.some((val) => val?.value === activeElement?.value));
+
+    const isLoggedIn = false;
 
   return (
     <nav className="flex select-none items-center justify-between gap-4 bg-primary-black px-5 text-white">
@@ -67,7 +71,7 @@ const Navbar = ({ activeElement, imageInputRef, handleImageUpload, handleActiveE
         ))}
       </ul>
 
-      <ActiveUsers />
+      <Login/>
     </nav>
   );
 };
