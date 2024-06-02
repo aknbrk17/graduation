@@ -25,6 +25,22 @@ import { defaultNavElement } from "@/constants";
 import { handleDelete, handleKeyDown } from "@/lib/key-events";
 import { handleImageUpload } from "@/lib/shapes";
 
+import { GetServerSideProps } from 'next';
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { req, res } = context;
+
+  const userId = req.cookies.userId; // Kullanıcının kimliğini cookie'den alın (veya başka bir yolla)
+
+  if (!userId) {
+    res.writeHead(302, { Location: '/sign-up' });
+    res.end();
+    return { props: {} };
+  }
+
+  return { props: {} };
+};
+
 export default function Page() {
   const undo = useUndo();
   const redo = useRedo();

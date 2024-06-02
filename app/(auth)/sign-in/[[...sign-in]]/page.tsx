@@ -1,10 +1,11 @@
-"use client"; // Bileşeni istemci bileşeni olarak işaretler
+"use client";
 
 import { useState, FormEvent } from "react";
 import { Input } from "../../../../components/ui/input";
 import { Button } from "../../../../components/ui/button";
 import axios from "axios";
-import { useRouter } from "next/navigation"; // next/navigation kullanarak yönlendirme
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface SignInForm {
   username: string;
@@ -84,6 +85,12 @@ const SignIn = () => {
             Submit
           </Button>
         </form>
+        <p className="text-center">
+          <Link href="/sign-up" passHref className="text-blue-500 hover:underline">
+            Don't have an account?{' '}
+            Sign Up
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
-"use client"; // Bileşeni istemci bileşeni olarak işaretler
+"use client";
 
 import { useState, FormEvent } from "react";
 import { Input } from "../../../../components/ui/input";
 import { Button } from "../../../../components/ui/button";
 import axios from "axios";
-import { useRouter } from "next/navigation"; // next/navigation kullanarak yönlendirme
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface UserForm {
   name: string;
@@ -54,7 +55,7 @@ const Register = () => {
             value={user.name}
             onChange={handleChange}
             required
-            placeholder="Name"
+            placeholder="Username"
             className="w-full"
           />
           <Input
@@ -82,6 +83,12 @@ const Register = () => {
             Submit
           </Button>
         </form>
+        <p className="text-center">
+          <Link href="/sign-in" passHref className="text-blue-500 hover:underline">
+            Already have an account?{' '}
+            Sign In
+          </Link>
+        </p>
       </div>
     </div>
   );
