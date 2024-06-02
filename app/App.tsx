@@ -45,9 +45,11 @@ object) => {
   if(!object) return;
 
   const {objectId} = object;
+ 
 
   const shapeData = object.toJSON();
   shapeData.objectId = objectId;
+  console.log(shapeData)
 
   const canvasObjects = storage.get('canvasObjects');
 
