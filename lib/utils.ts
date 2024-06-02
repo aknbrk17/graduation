@@ -105,14 +105,14 @@ export const exportToPdf = () => {
 
   //use jspdf
   const doc = new jsPDF({
-     orientation: "landscape",
-     unit: "px",
-     format: [canvas.width, canvas.height],
+    orientation: "landscape",
+    unit: "px",
+    format: [canvas.width, canvas.height],
   });
 
   // get the canvas data url
   const data = canvas.toDataURL();
-
+  console.log(data);
   // add the image to the pdf
   doc.addImage(data, "PNG", 0, 0, canvas.width, canvas.height);
 
